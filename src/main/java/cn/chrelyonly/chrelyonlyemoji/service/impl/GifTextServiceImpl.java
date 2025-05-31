@@ -33,18 +33,30 @@ public class GifTextServiceImpl implements GifTextService {
         decoder.read(new ByteArrayInputStream(gifBytes));
 
         BufferedImage avatar = ImageIO.read(new ByteArrayInputStream(avatarBytes));
-        avatar = resizeImage(avatar, 80, 80); // 设定头像大小
+        avatar = resizeImage(avatar, 150, 150); // 设定头像大小
 
         AnimatedGifEncoder encoder = new AnimatedGifEncoder();
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         encoder.start(outputStream);
         encoder.setRepeat(decoder.getLoopCount());
 
+//        头像帧
+        int[][] avatarPositions = {
+                {237, 50}, {229, 50}, {222, 50}, {214, 50}, {207, 50}, {199, 50}, {192, 50},
+                {184, 50}, {177, 50}, {169, 50}, {162, 50}, {154, 50}, {147, 50}, {139, 50},
+                {132, 50}, {124, 50}, {117, 50}, {109, 50}, {102, 50}, {94, 50}, {87, 50},
+                {79, 50}, {72, 50}, {64, 50}, {57, 50}, {49, 50}, {42, 50}, {34, 50}, {27, 50},
+                {50, 50}, {58, 50}, {67, 50}, {75, 50}, {84, 50}, {92, 50}, {101, 50},
+                {109, 50}, {118, 50}, {126, 50}, {135, 50}, {143, 50}, {152, 50}, {160, 50},
+                {169, 50}, {177, 50}, {186, 50}, {194, 50}, {203, 50}, {211, 50}, {220, 50},
+                {228, 50}, {237, 50}, {237, 50}, {237, 50}, {237, 50}, {237, 50}, {237, 50}
+        };
+//        循环素材帧
         for (int i = 0; i < decoder.getFrameCount(); i++) {
             BufferedImage frame = decoder.getFrame(i);
             int delay = decoder.getDelay(i);
 
-            BufferedImage modifiedFrame = overlayAvatar(frame, avatar, 250, 40); // 坐标需你自己调试
+            BufferedImage modifiedFrame = overlayAvatar(frame, avatar, avatarPositions[i][0], avatarPositions[i][1]);
             encoder.setDelay(delay);
             encoder.addFrame(modifiedFrame);
         }
