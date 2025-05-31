@@ -33,7 +33,8 @@ public class GifTextServiceImpl implements GifTextService {
         decoder.read(new ByteArrayInputStream(gifBytes));
 
         BufferedImage avatar = ImageIO.read(new ByteArrayInputStream(avatarBytes));
-        avatar = resizeImage(avatar, 150, 150); // 设定头像大小
+        // 设定头像大小
+        avatar = resizeImageToCircle(avatar, 150, 150);
 
         AnimatedGifEncoder encoder = new AnimatedGifEncoder();
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -87,11 +88,32 @@ public class GifTextServiceImpl implements GifTextService {
         return combined;
     }
 
-    private BufferedImage resizeImage(BufferedImage original, int targetWidth, int targetHeight) {
+    private BufferedImage resizeImageToCircle(BufferedImage original, int targetWidth, int targetHeight) {
+        // 先缩放图片到目标大小
         BufferedImage resized = new BufferedImage(targetWidth, targetHeight, BufferedImage.TYPE_INT_ARGB);
-        Graphics2D g = resized.createGraphics();
-        g.drawImage(original, 0, 0, targetWidth, targetHeight, null);
+        Graphics2D g2 = resized.createGraphics();
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g2.drawImage(original, 0, 0, targetWidth, targetHeight, null);
+        g2.dispose();
+
+        // 创建一个圆形裁剪后的图片
+        BufferedImage circleBuffer = new BufferedImage(targetWidth, targetHeight, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g = circleBuffer.createGraphics();
+        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+        // 清空画布（透明）
+        g.setComposite(AlphaComposite.Clear);
+        g.fillRect(0, 0, targetWidth, targetHeight);
+
+        // 画圆形剪裁区域
+        g.setComposite(AlphaComposite.Src);
+        g.setClip(new java.awt.geom.Ellipse2D.Float(0, 0, targetWidth, targetHeight));
+
+        // 将缩放后的图片绘制到圆形区域内
+        g.drawImage(resized, 0, 0, null);
         g.dispose();
-        return resized;
+
+        return circleBuffer;
     }
+
 }
