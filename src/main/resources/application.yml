@@ -1,0 +1,7 @@
+spring:
+  application:
+    name: chrelyonly-emoji
+  profiles:
+    active: dev
+server:
+  port: 8081
