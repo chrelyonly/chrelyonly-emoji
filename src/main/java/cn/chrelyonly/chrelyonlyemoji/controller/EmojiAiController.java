@@ -12,6 +12,8 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -30,5 +32,18 @@ public class EmojiAiController {
     public static String emojiToken = "";
     private final GifTextService gifTextService;
 
+    @SneakyThrows
+    @RequestMapping("/gif")
+    public R gif(HttpServletResponse response) {
+        String gifPath = "D:\\dev\\dev\\project\\chrelyonly-emoji\\resource\\1.gif";
+        String avatarPath = "D:\\dev\\dev\\project\\chrelyonly-emoji\\resource\\2.jpg";
+        byte[] result = gifTextService.replaceGifFace(
+                Files.readAllBytes(Paths.get(gifPath)),
+                Files.readAllBytes(Paths.get(avatarPath))
+        );
+        response.setContentType("image/gif");
+        response.getOutputStream().write(result);
+        return R.ok();
+    }
 
 }
