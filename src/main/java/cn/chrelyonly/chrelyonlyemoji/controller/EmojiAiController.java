@@ -3,6 +3,7 @@ package cn.chrelyonly.chrelyonlyemoji.controller;
 import cn.chrelyonly.chrelyonlyemoji.service.GifTextService;
 import cn.chrelyonly.chrelyonlyemoji.util.MyEmojiUtil;
 import cn.chrelyonly.chrelyonlyemoji.util.R;
+import cn.hutool.core.io.resource.ResourceUtil;
 import cn.hutool.http.HttpRequest;
 import cn.hutool.http.HttpResponse;
 import com.alibaba.fastjson2.JSONObject;
@@ -51,7 +52,7 @@ public class EmojiAiController {
     @SneakyThrows
     @RequestMapping("/uploadEmoji")
     public R uploadEmoji(HttpServletResponse response,@RequestBody Map<String, String> body) {
-        String gifPath = "D:\\dev\\dev\\project\\chrelyonly-emoji\\resource\\1.gif";
+        byte[] gifBytes = ResourceUtil.readBytes("static/resource/1.gif");
         String base64 = body.get("base64");
         // 去掉前缀：data:image/png;base64,
         if (base64.contains(",")) {
@@ -60,7 +61,7 @@ public class EmojiAiController {
         // ✅ 这是正确的处理方式
         byte[] avatar = Base64.getDecoder().decode(base64);
         byte[] result = gifTextService.replaceGifFace(
-                Files.readAllBytes(Paths.get(gifPath)),
+                gifBytes,
                 avatar);
 //        response.setContentType("image/gif");
 //        response.getOutputStream().write(result);
