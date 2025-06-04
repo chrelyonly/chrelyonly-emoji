@@ -34,7 +34,7 @@ public class GifTextServiceImpl implements GifTextService {
 
         BufferedImage avatar = ImageIO.read(new ByteArrayInputStream(avatarBytes));
         // 设定头像大小
-        avatar = resizeImageToCircle(avatar, 160, 160);
+        avatar = resizeImageToCircle(avatar, 155, 155);
 
         AnimatedGifEncoder encoder = new AnimatedGifEncoder();
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();

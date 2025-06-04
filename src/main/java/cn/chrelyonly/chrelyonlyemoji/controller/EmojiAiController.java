@@ -36,7 +36,7 @@ public class EmojiAiController {
     @RequestMapping("/gif")
     public R gif(HttpServletResponse response) {
         String gifPath = "D:\\dev\\dev\\project\\chrelyonly-emoji\\resource\\1.gif";
-        String avatarPath = "D:\\dev\\dev\\project\\chrelyonly-emoji\\resource\\2.jpg";
+        String avatarPath = "D:\\dev\\dev\\project\\chrelyonly-emoji\\resource\\3.jpg";
         byte[] result = gifTextService.replaceGifFace(
                 Files.readAllBytes(Paths.get(gifPath)),
                 Files.readAllBytes(Paths.get(avatarPath))
