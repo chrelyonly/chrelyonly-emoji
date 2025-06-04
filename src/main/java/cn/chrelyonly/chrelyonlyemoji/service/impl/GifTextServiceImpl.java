@@ -34,7 +34,7 @@ public class GifTextServiceImpl implements GifTextService {
 
         BufferedImage avatar = ImageIO.read(new ByteArrayInputStream(avatarBytes));
         // 设定头像大小
-        avatar = resizeImageToCircle(avatar, 165, 165);
+        avatar = resizeImageToCircle(avatar, 160, 160);
 
         AnimatedGifEncoder encoder = new AnimatedGifEncoder();
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -43,25 +43,23 @@ public class GifTextServiceImpl implements GifTextService {
 
 //        头像帧
         int[][] avatarPositions = {
-                {237, 25}, {229, 28}, {221, 23}, {213, 27}, {205, 22}, {197, 26}, {189, 21},
-                {181, 29}, {173, 24}, {165, 30}, {157, 22}, {149, 26}, {141, 21}, {133, 28},
-                {125, 23}, {117, 29}, {109, 24}, {101, 30}, {93, 22},  {85, 26}, {77, 21},
-                {69, 29}, {61, 24},  {53, 30},  {50, 22}, {50, 27}, {50, 23}, {50, 29},
-                {50, 25}, {50, 25}, {50, 30}, {50, 24}, {50, 20}, {50, 28}, {50, 25},
-                {58, 29}, {66, 24}, {74, 30},
-                {90, 26}, {98, 21}, {114, 23}, {130, 24}, {138, 30}, {154, 26}, {170, 29}, {178, 23}, {186, 28},
-                {210, 22}, {218, 27}, {226, 23}, {234, 29}, {237, 30}, {237, 30}, {237, 24}, {237, 30}, {237, 28},
-                {237, 28}, {237, 28}, {237, 28}, {237, 28}
+                {225, 20}, {227, 20}, {227, 18}, {227, 18}, {218, 18}, {210, 18}, {198, 20},
+                {185, 25}, {179, 23}, {170, 21}, {160, 25}, {152, 25}, {145, 24}, {138, 28},
+                {122, 18}, {117, 22}, {108, 25}, {100, 22}, {91, 25}, {89, 22}, {80, 22},
+                {78, 15}, {66, 15}, {65, 18}, {50, 18}, {46, 20}, {52, 20}, {39, 20},
+                {41, 20}, {46, 24}, {49, 20}, {49, 25}, {49, 22}, {52, 20}, {52, 23},
+                {74, 18}, {79, 18}, {106, 20}, {108, 17}, {120 ,20}, {127 ,20}, {149, 18},
+                {160, 20}, {177, 23}, { 184, 25}, {199, 23}, { 200, 22}, {209, 22},
+                { 215, 22}, {225, 20}, { 222, 20}, { 224, 20}, {226, 20}, { 226, 20},
+                {227, 20}, {224, 20}, { 227, 20},
         };
-
-
 
 //        循环素材帧
         for (int i = 0; i < decoder.getFrameCount(); i++) {
             BufferedImage frame = decoder.getFrame(i);
             int delay = decoder.getDelay(i);
 
-            BufferedImage modifiedFrame = overlayAvatar(frame, avatar, avatarPositions[i][0], avatarPositions[i][1]);
+            BufferedImage modifiedFrame = overlayAvatar(frame, avatar, avatarPositions[i][0] - 4, avatarPositions[i][1] - 4);
             encoder.setDelay(delay);
             encoder.addFrame(modifiedFrame);
         }
@@ -71,8 +69,8 @@ public class GifTextServiceImpl implements GifTextService {
     }
 
     private BufferedImage overlayAvatar(BufferedImage frame, BufferedImage avatar, int x, int y) {
-        BufferedImage combined = new BufferedImage(
-                frame.getWidth(), frame.getHeight(), BufferedImage.TYPE_INT_ARGB);
+//        BufferedImage combined = new BufferedImage(frame.getWidth(), frame.getHeight(), BufferedImage.TYPE_INT_ARGB);
+        BufferedImage combined = new BufferedImage(frame.getWidth(), frame.getHeight(), BufferedImage.TYPE_INT_ARGB);
 
         Graphics2D g = combined.createGraphics();
         g.drawImage(frame, 0, 0, null);
