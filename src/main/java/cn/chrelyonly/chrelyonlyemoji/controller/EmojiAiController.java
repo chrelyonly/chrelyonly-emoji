@@ -34,16 +34,17 @@ public class EmojiAiController {
 
     @SneakyThrows
     @RequestMapping("/gif")
-    public R gif(HttpServletResponse response) {
+    public void gif(HttpServletResponse response) {
         String gifPath = "D:\\dev\\dev\\project\\chrelyonly-emoji\\resource\\1.gif";
-        String avatarPath = "D:\\dev\\dev\\project\\chrelyonly-emoji\\resource\\2.gif";
+        String avatarPath = "D:\\dev\\dev\\project\\chrelyonly-emoji\\resource\\2.jpg";
         byte[] result = gifTextService.replaceGifFace(
                 Files.readAllBytes(Paths.get(gifPath)),
                 Files.readAllBytes(Paths.get(avatarPath))
         );
         response.setContentType("image/gif");
         response.getOutputStream().write(result);
-        return R.ok();
+        response.getOutputStream().flush();
+//        return R.ok();
     }
 
 }
