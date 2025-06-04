@@ -1,0 +1,34 @@
+services:
+  chrelyonly-emoji-app:
+    #    build:
+    #      dockerfile: Dockerfile
+    image: eclipse-temurin:17-jre-alpine
+    #    image: python:3.13
+    container_name: chrelyonly-emoji-app
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - /www/dk_project/dk_app/chrelyonly-emoji-app/app:/app
+    working_dir: /app
+    dns:
+      - 114.114.114.114
+      - 1.1.1.1  # Cloudflare DNS
+    networks:
+      my-network:
+        ipv4_address: 172.20.0.27
+    # 运行应用
+#    command: ["./main"]
+    command: ["java", "-jar", "/app/app.jar","--spring.profiles.active=prod"]
+#    command: ["sh", "-c", "tail -f /dev/null"]
+
+networks:
+  my-network:  # 定义自定义网络
+    name: my-network         # 可选：自定义网络名称
+    driver: bridge  # 使用默认的 bridge 网络驱动
+    ipam: # IP 地址管理配置（IP Address Management）
+      driver: default           # 使用默认 IPAM 驱动
+      config: # 子网配置（可多个）
+        - subnet: 172.20.0.0/16     # 子网网段 172.20.0.1 -- 172.20.255.254
+          gateway: 172.20.0.1       # 默认网关
+          aux_addresses: # 预留 IP 地址
+            host1: 172.20.0.2
+            host2: 172.20.0.3

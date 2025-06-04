@@ -96,7 +96,7 @@
 
             const upload = () => {
                 uploading.value = true;
-                axios.post('/emoji/uploadEmoji', {
+                axios.post('/emoji-app/emoji/uploadEmoji', {
                     base64: base64Image.value
                 }).then(res => {
                     gifUrl.value = 'data:image/gif;base64,' + res.data.data;
