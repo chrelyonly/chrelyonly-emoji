@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>头像生成表情包</title>
+    <link rel="stylesheet" href="https://unpkg.com/element-plus/dist/index.css"/>
+    <style>
+        body {
+            background: #f7f9fa;
+            font-family: "Helvetica Neue", sans-serif;
+        }
+        #app {
+            max-width: 600px;
+            margin: 60px auto;
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        .preview img {
+            max-width: 100%;
+            max-height: 300px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            margin-top: 20px;
+        }
+        .result img {
+            margin-top: 30px;
+            border: 2px solid #4CAF50;
+        }
+    </style>
+</head>
+<body>
+<div id="app">
+    <el-card>
+        <template #header>
+            <h2 style="text-align: center;">上传头像生成表情包 GIF</h2>
+        </template>
+
+        <el-upload
+                drag
+                :limit="1"
+                accept="image/*"
+                :auto-upload="false"
+                :on-change="handleChange"
+        >
+            <el-icon style="font-size: 60px; color: #409EFF;">
+                <UploadFilled />
+            </el-icon>
+            <div class="el-upload__text">拖拽或点击上传头像</div>
+        </el-upload>
+
+        <div class="preview" v-if="previewUrl">
+            <h4>上传头像预览：</h4>
+            <img :src="previewUrl" />
+        </div>
+
+        <div style="text-align: center; margin-top: 20px;">
+            <el-button type="primary" :disabled="!base64Image" :loading="uploading" @click="upload">
+                生成 GIF 表情包
+            </el-button>
+        </div>
+
+        <div class="result" v-if="gifUrl">
+            <h4>生成的表情包 GIF：</h4>
+            <img :src="gifUrl" />
+        </div>
+    </el-card>
+</div>
+
+<script src="https://unpkg.com/vue@3"></script>
+<script src="https://unpkg.com/element-plus"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script src="https://unpkg.com/@element-plus/icons-vue"></script>
+
+<script>
+    const { createApp, ref } = Vue;
+
+    const app = createApp({
+        setup() {
+            const previewUrl = ref('');
+            const base64Image = ref('');
+            const gifUrl = ref('');
+            const uploading = ref(false);
+
+            const handleChange = (uploadFile) => {
+                const file = uploadFile.raw;
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    previewUrl.value = e.target.result;
+                    base64Image.value = e.target.result.split(',')[1];
+                };
+                reader.readAsDataURL(file);
+            };
+
+            const upload = () => {
+                uploading.value = true;
+                axios.post('/emoji/uploadEmoji', {
+                    base64: base64Image.value
+                }).then(res => {
+                    gifUrl.value = 'data:image/gif;base64,' + res.data.data;
+                    uploading.value = false;
+                }).catch(() => {
+                    ElementPlus.ElMessage.error('生成失败');
+                    uploading.value = false;
+                });
+            };
+
+            return {
+                previewUrl,
+                base64Image,
+                uploading,
+                gifUrl,
+                handleChange,
+                upload
+            };
+        }
+    });
+
+    for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
+        app.component(key, component);
+    }
+
+    app.use(ElementPlus).mount('#app');
+</script>
+</body>
+</html>
