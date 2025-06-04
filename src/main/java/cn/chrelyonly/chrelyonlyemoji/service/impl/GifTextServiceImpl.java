@@ -17,31 +17,43 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 /**
- * @author 11725
+ * 实现 GifTextService 接口，实现将圆形头像叠加到 gif 每一帧的指定位置
  */
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class GifTextServiceImpl implements GifTextService {
 
+    // Spring 注入的资源加载器
     private final ResourceLoader resourceLoader;
+
+    // 当前线程的 HTTP 响应对象
     private final HttpServletResponse response;
 
+    /**
+     * 将头像叠加到 gif 的每一帧中
+     * @param gifBytes 原始 gif 图片的字节数组
+     * @param avatarBytes 头像图片的字节数组
+     * @return 合成后的 gif 字节数组
+     * @throws IOException 图片读取失败时抛出
+     */
     @Override
     public byte[] replaceGifFace(byte[] gifBytes, byte[] avatarBytes) throws IOException {
+        // 解码 GIF 图片
         GifDecoder decoder = new GifDecoder();
         decoder.read(new ByteArrayInputStream(gifBytes));
 
+        // 读取头像图片，并裁剪为圆形大小为 155x155
         BufferedImage avatar = ImageIO.read(new ByteArrayInputStream(avatarBytes));
-        // 设定头像大小
         avatar = resizeImageToCircle(avatar, 155, 155);
 
+        // 初始化 gif 编码器
         AnimatedGifEncoder encoder = new AnimatedGifEncoder();
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         encoder.start(outputStream);
         encoder.setRepeat(decoder.getLoopCount());
 
-//        头像帧
+        // 每一帧对应的头像坐标数组
         int[][] avatarPositions = {
                 {225, 20}, {227, 20}, {227, 18}, {227, 18}, {218, 18}, {210, 18}, {198, 20},
                 {185, 25}, {179, 23}, {170, 21}, {160, 25}, {152, 25}, {145, 24}, {138, 28},
@@ -49,62 +61,80 @@ public class GifTextServiceImpl implements GifTextService {
                 {78, 15}, {66, 15}, {65, 18}, {50, 18}, {46, 20}, {52, 20}, {39, 20},
                 {41, 20}, {46, 24}, {49, 20}, {49, 25}, {49, 22}, {52, 20}, {52, 23},
                 {74, 18}, {79, 18}, {106, 20}, {108, 17}, {120 ,20}, {127 ,20}, {149, 18},
-                {160, 20}, {177, 23}, { 184, 25}, {199, 23}, { 200, 22}, {209, 22},
-                { 215, 22}, {225, 20}, { 222, 20}, { 224, 20}, {226, 20}, { 226, 20},
-                {227, 20}, {224, 20}, { 227, 20},
+                {160, 20}, {177, 23}, {184, 25}, {199, 23}, {200, 22}, {209, 22},
+                {215, 22}, {225, 20}, {222, 20}, {224, 20}, {226, 20}, {226, 20},
+                {227, 20}, {224, 20}, {227, 20},
         };
 
-//        循环素材帧
+        // 遍历每一帧，叠加头像并添加到新的 gif 中
         for (int i = 0; i < decoder.getFrameCount(); i++) {
+            // 获取原始帧和延迟时间
             BufferedImage frame = decoder.getFrame(i);
             int delay = decoder.getDelay(i);
 
+            // 合成头像与原始帧图像
             BufferedImage modifiedFrame = overlayAvatar(frame, avatar, avatarPositions[i][0] - 4, avatarPositions[i][1] - 4);
             encoder.setDelay(delay);
             encoder.addFrame(modifiedFrame);
         }
 
+        // 编码完成，返回合成后的 gif 字节数组
         encoder.finish();
         return outputStream.toByteArray();
     }
 
+    /**
+     * 将头像叠加到 gif 帧图像中指定位置
+     * @param frame gif 的一帧图像
+     * @param avatar 已处理成圆形的头像图像
+     * @param x x 坐标位置
+     * @param y y 坐标位置
+     * @return 合成后的图像
+     */
     private BufferedImage overlayAvatar(BufferedImage frame, BufferedImage avatar, int x, int y) {
-//        BufferedImage combined = new BufferedImage(frame.getWidth(), frame.getHeight(), BufferedImage.TYPE_INT_ARGB);
+        // 创建与帧相同大小的透明图像
         BufferedImage combined = new BufferedImage(frame.getWidth(), frame.getHeight(), BufferedImage.TYPE_INT_ARGB);
 
+        // 在图像上绘制帧和头像
         Graphics2D g = combined.createGraphics();
         g.drawImage(frame, 0, 0, null);
-        g.drawImage(avatar, x, y, null); // 替换头像的位置
+        g.drawImage(avatar, x, y, null);
         g.dispose();
         return combined;
     }
 
+    /**
+     * 将输入图片缩放为指定大小并裁剪为圆形
+     * @param original 原始图片
+     * @param targetWidth 目标宽度
+     * @param targetHeight 目标高度
+     * @return 裁剪为圆形的图像
+     */
     private BufferedImage resizeImageToCircle(BufferedImage original, int targetWidth, int targetHeight) {
-        // 先缩放图片到目标大小
+        // 先缩放图片为目标大小
         BufferedImage resized = new BufferedImage(targetWidth, targetHeight, BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2 = resized.createGraphics();
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g2.drawImage(original, 0, 0, targetWidth, targetHeight, null);
         g2.dispose();
 
-        // 创建一个圆形裁剪后的图片
+        // 创建圆形缓冲图像并设置裁剪区域为圆形
         BufferedImage circleBuffer = new BufferedImage(targetWidth, targetHeight, BufferedImage.TYPE_INT_ARGB);
         Graphics2D g = circleBuffer.createGraphics();
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-        // 清空画布（透明）
+        // 设置为透明背景
         g.setComposite(AlphaComposite.Clear);
         g.fillRect(0, 0, targetWidth, targetHeight);
 
-        // 画圆形剪裁区域
+        // 设置圆形裁剪区域
         g.setComposite(AlphaComposite.Src);
         g.setClip(new java.awt.geom.Ellipse2D.Float(0, 0, targetWidth, targetHeight));
 
-        // 将缩放后的图片绘制到圆形区域内
+        // 绘制缩放后的图片到圆形区域
         g.drawImage(resized, 0, 0, null);
         g.dispose();
 
         return circleBuffer;
     }
-
 }
