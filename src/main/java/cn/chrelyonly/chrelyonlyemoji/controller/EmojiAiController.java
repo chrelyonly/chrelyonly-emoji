@@ -52,7 +52,7 @@ public class EmojiAiController {
     @SneakyThrows
     @RequestMapping("/uploadEmoji")
     public R uploadEmoji(HttpServletResponse response,@RequestBody Map<String, String> body) {
-        byte[] gifBytes = ResourceUtil.readBytes("static/resource/2.gif");
+        byte[] gifBytes = ResourceUtil.readBytes("static/resource/3.gif");
         String base64 = body.get("base64");
         // 去掉前缀：data:image/png;base64,
         if (base64.contains(",")) {
